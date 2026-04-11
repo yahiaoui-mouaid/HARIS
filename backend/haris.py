@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 import mediapipe as mp
 import os
 import urllib.request
@@ -41,6 +40,101 @@ HOLDABLE_CLASSES = {
     41: "cup",
     76: "scissors",
     79: "toothbrush",
+        # COCO grocery / kitchen items (15)
+    40: "wine glass",
+    42: "fork",
+    43: "knife",
+    44: "spoon",
+    45: "bowl",
+    46: "banana",
+    47: "apple",
+    48: "sandwich",
+    49: "orange",
+    50: "broccoli",
+    51: "carrot",
+    52: "hot dog",
+    53: "pizza",
+    54: "donut",
+    55: "cake",
+
+    # New tech items (headphones, wearables, accessories) (30)
+    80: "headphones",
+    81: "earbuds",
+    82: "smartwatch",
+    83: "tablet",
+    84: "power bank",
+    85: "charger",
+    86: "usb cable",
+    87: "bluetooth speaker",
+    88: "webcam",
+    89: "microphone",
+    90: "smartphone stand",
+    91: "smart glasses",
+    92: "fitness tracker",
+    93: "gaming controller",
+    94: "external hard drive",
+    95: "ssd",
+    96: "usb flash drive",
+    97: "smart plug",
+    98: "smart bulb",
+    99: "router",
+    100: "smart home hub",
+    101: "vr headset",
+    102: "action camera",
+    103: "drone",
+    104: "stylus pen",
+    105: "digital pen",
+    106: "graphics tablet",
+    107: "portable monitor",
+    108: "keyboard cover",
+    109: "laptop stand",
+
+    # Additional grocery / supermarket goods (45)
+    110: "milk carton",
+    111: "yogurt cup",
+    112: "cheese block",
+    113: "butter stick",
+    114: "eggs carton",
+    115: "bread loaf",
+    116: "bagel",
+    117: "croissant",
+    118: "cereal box",
+    119: "pasta box",
+    120: "rice bag",
+    121: "flour bag",
+    122: "sugar bag",
+    123: "salt shaker",
+    124: "pepper grinder",
+    125: "olive oil bottle",
+    126: "vinegar bottle",
+    127: "ketchup bottle",
+    128: "mustard bottle",
+    129: "mayonnaise jar",
+    130: "jam jar",
+    131: "honey jar",
+    132: "peanut butter jar",
+    133: "nutella jar",
+    134: "canned beans",
+    135: "canned tuna",
+    136: "canned soup",
+    137: "soda can",
+    138: "juice box",
+    139: "water bottle",
+    140: "coffee bag",
+    141: "tea box",
+    142: "chocolate bar",
+    143: "candy bag",
+    144: "chips bag",
+    145: "pretzel bag",
+    146: "popcorn bag",
+    147: "ice cream tub",
+    148: "frozen pizza box",
+    149: "frozen vegetables bag",
+    150: "tofu pack",
+    151: "meat tray",
+    152: "fish fillet pack",
+    153: "deli meat pack",
+    154: "baby food jar",
 }
 
 
@@ -154,9 +248,7 @@ def generate_frames():
             proximity_px = w * PROXIMITY_RATIO
 
             # --- PHASE A: YOLO OBJECT DETECTION ---
-            # FIX: Lower conf to 0.25 so held objects aren't missed.
-            # FIX: agnostic_nms=True stops YOLO suppressing object boxes
-            #      that overlap heavily with the person box.
+
             yolo_results = yolo_model(
                 frame,
                 conf=0.25,
