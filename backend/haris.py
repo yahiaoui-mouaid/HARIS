@@ -12,10 +12,7 @@ from mediapipe.tasks import python as mp_python
 from mediapipe.tasks.python import vision as mp_vision
 from app import db, Photo, app
 
-with app.app_context():
-    db.create_all()
-
-# --- 1. CONFIGURATION & MODEL PATHS ---
+# CONFIGURATION & MODEL PATHS
 YOLO_MODEL_NAME = "yolov8n.pt"
 POSE_MODEL_PATH = "pose_landmarker_full.task"
 POSE_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task"
@@ -26,9 +23,9 @@ LAST_CAPTURE_TIME = 0
 COOLDOWN_SECONDS = 3.0
 POCKET_THRESHOLD = 0.12
 
-# FIX: COCO class IDs that count as "holdable" objects.
-# YOLOv8n uses COCO labels — cell phone is class 67.
-# Expand this list if you want to detect other objects too.
+
+# YOLOv8n uses COCO labels:
+
 HOLDABLE_CLASSES = {
     67: "cell phone",
     63: "laptop",
@@ -40,110 +37,15 @@ HOLDABLE_CLASSES = {
     41: "cup",
     76: "scissors",
     79: "toothbrush",
-        # COCO grocery / kitchen items (15)
-    40: "wine glass",
-    42: "fork",
-    43: "knife",
-    44: "spoon",
-    45: "bowl",
-    46: "banana",
-    47: "apple",
-    48: "sandwich",
-    49: "orange",
-    50: "broccoli",
-    51: "carrot",
-    52: "hot dog",
-    53: "pizza",
-    54: "donut",
-    55: "cake",
-
-    # New tech items (headphones, wearables, accessories) (30)
-    80: "headphones",
-    81: "earbuds",
-    82: "smartwatch",
-    83: "tablet",
-    84: "power bank",
-    85: "charger",
-    86: "usb cable",
-    87: "bluetooth speaker",
-    88: "webcam",
-    89: "microphone",
-    90: "smartphone stand",
-    91: "smart glasses",
-    92: "fitness tracker",
-    93: "gaming controller",
-    94: "external hard drive",
-    95: "ssd",
-    96: "usb flash drive",
-    97: "smart plug",
-    98: "smart bulb",
-    99: "router",
-    100: "smart home hub",
-    101: "vr headset",
-    102: "action camera",
-    103: "drone",
-    104: "stylus pen",
-    105: "digital pen",
-    106: "graphics tablet",
-    107: "portable monitor",
-    108: "keyboard cover",
-    109: "laptop stand",
-
-    # Additional grocery / supermarket goods (45)
-    110: "milk carton",
-    111: "yogurt cup",
-    112: "cheese block",
-    113: "butter stick",
-    114: "eggs carton",
-    115: "bread loaf",
-    116: "bagel",
-    117: "croissant",
-    118: "cereal box",
-    119: "pasta box",
-    120: "rice bag",
-    121: "flour bag",
-    122: "sugar bag",
-    123: "salt shaker",
-    124: "pepper grinder",
-    125: "olive oil bottle",
-    126: "vinegar bottle",
-    127: "ketchup bottle",
-    128: "mustard bottle",
-    129: "mayonnaise jar",
-    130: "jam jar",
-    131: "honey jar",
-    132: "peanut butter jar",
-    133: "nutella jar",
-    134: "canned beans",
-    135: "canned tuna",
-    136: "canned soup",
-    137: "soda can",
-    138: "juice box",
-    139: "water bottle",
-    140: "coffee bag",
-    141: "tea box",
-    142: "chocolate bar",
-    143: "candy bag",
-    144: "chips bag",
-    145: "pretzel bag",
-    146: "popcorn bag",
-    147: "ice cream tub",
-    148: "frozen pizza box",
-    149: "frozen vegetables bag",
-    150: "tofu pack",
-    151: "meat tray",
-    152: "fish fillet pack",
-    153: "deli meat pack",
-    154: "baby food jar",
 }
 
 
-# --- 2. DOWNLOAD POSE MODEL IF MISSING ---
+# DOWNLOAD POSE MODEL IF MISSING 
 if not os.path.exists(POSE_MODEL_PATH):
     print("Downloading MediaPipe pose model...")
     urllib.request.urlretrieve(POSE_MODEL_URL, POSE_MODEL_PATH)
 
-# --- 3. INITIALIZE MODELS ---
+# INITIALIZE MODELS
 yolo_model = YOLO(YOLO_MODEL_NAME)
 
 base_options = mp_python.BaseOptions(model_asset_path=POSE_MODEL_PATH)
@@ -158,7 +60,7 @@ options = mp_vision.PoseLandmarkerOptions(
 landmarker = mp_vision.PoseLandmarker.create_from_options(options)
 
 
-# --- 4. HELPER FUNCTIONS ---
+# HELPER FUNCTIONS
 
 def boxes_are_close(person_box, obj_box, proximity_px):
     """Check if object bounding box is within proximity_px of, or inside, person box."""
@@ -173,12 +75,7 @@ def boxes_are_close(person_box, obj_box, proximity_px):
 
 
 def box_is_inside(person_box, obj_box):
-    """
-    FIX: Check if the object box is fully or mostly inside the person box.
-    This catches phones/remotes that are swallowed by the person bounding box
-    and suppressed by NMS before they reach boxes_are_close().
-    Returns True if >60% of the object area overlaps with the person box.
-    """
+    """ Returns True if >60% of the object area overlaps with the person box. """
     px1, py1, px2, py2 = person_box
     ox1, oy1, ox2, oy2 = obj_box
 
@@ -225,7 +122,7 @@ def capture_and_save(frame):
     print(f"[Screenshot] Saved {filename}")
 
 
-# --- 5. MAIN LOOP ---
+# MAIN LOOP
 
 def generate_frames():
     global LAST_CAPTURE_TIME
@@ -269,7 +166,7 @@ def generate_frames():
                     color = (0, 255, 0)
                     person_boxes.append(coords)
                 elif cls_id in HOLDABLE_CLASSES:
-                    # FIX: Only track holdable objects, ignoring furniture/vehicles etc.
+                    
                     color = (0, 165, 255)
                     object_boxes.append(coords)
                 else:
@@ -279,8 +176,8 @@ def generate_frames():
                 cv2.putText(frame, label, (x1, y1 - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-            # FIX: Check both proximity AND containment.
-            # A held phone is usually inside the person box, not just near it.
+           
+            
             holding_detected = False
             for person_box in person_boxes:
                 for obj_box in object_boxes:
@@ -291,8 +188,7 @@ def generate_frames():
                 if holding_detected:
                     break
 
-            # FIX: Fallback — if NMS removed the object box entirely, re-run
-            # YOLO on just the person crop at lower confidence to find it.
+            
             if not holding_detected and person_boxes:
                 for person_box in person_boxes:
                     px1, py1, px2, py2 = map(int, person_box)
@@ -329,7 +225,7 @@ def generate_frames():
                     1, (0, 255, 255), 2
                 )
 
-            # --- PHASE B: MEDIAPIPE POSE DETECTION ---
+            # MEDIAPIPE POSE DETECTION
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb_frame)
             pose_result = landmarker.detect_for_video(mp_image, timestamp_ms)
@@ -348,7 +244,7 @@ def generate_frames():
                                 daemon=True
                             ).start()
 
-            # --- PHASE C: STREAM OUTPUT ---
+            # STREAM OUTPUT
             ret_enc, buffer = cv2.imencode('.jpg', frame)
             if ret_enc:
                 frame_bytes = buffer.tobytes()
