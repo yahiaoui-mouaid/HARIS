@@ -75,4 +75,4 @@ Open your browser to the React frontend URL to view the live dashboard!
 ## 🤖 Technology Stack
 **Frontend:** React, Vite, TailwindCSS, Framer Motion, Recharts, Lucide-React. \
 **Backend:** Python 3, Flask, SQLAlchemy, OpenCV (`cv2`). \
-**Artificial Intelligence:** YOLOv8 (Ultralytics), MediaPipe Pose Estimation, PyTorch.
+**Artificial Intelligence:** YOLOv8 (Ultralytics), MediaPipe Pose Estimation.
