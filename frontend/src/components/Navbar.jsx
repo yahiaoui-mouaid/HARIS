@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Camera } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { API_BASE } from '../api';
@@ -15,8 +16,7 @@ export default function Navbar() {
         .then(data => {
           setSystemOnline(true);
           if (data) {
-            // Append 'Z' so the browser treats it as UTC, not local time
-            const alertTime = new Date(data.upload_time + 'Z');
+            const alertTime = new Date(data.upload_time);
             const now = new Date();
             const secondsAgo = (now - alertTime) / 1000;
             setHasActiveAlert(secondsAgo < 30);
@@ -43,13 +43,26 @@ export default function Navbar() {
 
   return (
     <nav className="w-full bg-bg-surface border-b border-border flex items-center justify-between px-6 h-16 shrink-0 relative z-20">
-      {/* Left side — HARIS Logo */}
+      {/* Left side */}
       <div className="flex items-center gap-3">
         <img
-          src="/Haris logo final.png"
-          alt="HARIS"
-          className="h-9 w-auto object-contain"
+          src="/Haris logo final.png"   // file is in /public
+          alt="Haris Logo"
+          className="h-10 w-auto"       // adjust size as needed
         />
+        <div className="flex font-rajdhani font-bold tracking-[0.2em] text-xl text-white-soft mt-1">
+          {logoText.split('').map((char, index) => (
+            <motion.span
+              key={index}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05, duration: 0.3 }}
+              className="inline-block"
+            >
+              {char}
+            </motion.span>
+          ))}
+        </div>
       </div>
 
       {/* Center Links */}
@@ -90,7 +103,7 @@ export default function Navbar() {
             </>
           )}
         </NavLink>
-        <NavLink
+                <NavLink
           to="/about"
           className={({ isActive }) =>
             `relative h-full flex items-center transition-colors hover:text-grey-light text-sm font-semibold tracking-widest ${isActive ? 'text-white-soft [text-shadow:0_0_8px_var(--color-red-glow)]' : 'text-grey-mid'}`
@@ -110,29 +123,17 @@ export default function Navbar() {
         </NavLink>
       </div>
 
-      {/* Right corner — live status chip & logout */}
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2">
-          <div className="relative flex h-3 w-3 items-center justify-center">
-            {statusConfig.pingClass && (
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusConfig.pingClass} opacity-75`} />
-            )}
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${statusConfig.dotClass}`} />
-          </div>
-          <span className="text-xs text-grey-light font-mono tracking-widest mt-0.5">
-            {statusConfig.label}
-          </span>
+      {/* Right corner — live status chip */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex h-3 w-3 items-center justify-center">
+          {statusConfig.pingClass && (
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusConfig.pingClass} opacity-75`} />
+          )}
+          <span className={`relative inline-flex rounded-full h-2 w-2 ${statusConfig.dotClass}`} />
         </div>
-        
-        <button 
-          onClick={() => {
-            localStorage.removeItem('isAuthenticated');
-            window.location.href = '/login';
-          }}
-          className="text-xs font-mono tracking-widest text-grey-mid hover:text-red-hot transition-colors border border-transparent hover:border-red-hot border-b px-2 py-1"
-        >
-          LOGOUT
-        </button>
+        <span className="text-xs text-grey-light font-mono tracking-widest mt-0.5">
+          {statusConfig.label}
+        </span>
       </div>
     </nav>
   );
